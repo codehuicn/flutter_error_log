@@ -128,12 +128,16 @@ class ErrorLog {
     );
 
     _logFile = await _getLocalFile();
-    _uploadFile(_logFile);
+    info('应用启动成功。');
+
+    if( !_debugMode ) _uploadFile(_logFile);
     Timer.periodic(Duration(minutes: _minutesWait), (timer) async {
-      if (_fileChange) {
+
+      if ( _fileChange && !_debugMode ) {
         await _uploadFile(_logFile);
         _fileChange = false;
       }
+      
     });
 
   }
