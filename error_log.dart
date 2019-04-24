@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:device_info/device_info.dart';
 
 /// ### 记录项目日志、捕获项目错误、缓存所有记录、写入文件、上传服务器
 /// * 初始化：
@@ -50,9 +51,20 @@ import 'package:path_provider/path_provider.dart';
 /// ```
 /// 
 /// ### 上传服务器
-/// 打开应用时上传一次，然后设置计时器，建议30分钟上传一次。
+/// 打开应用时上传一次，然后设置计时器，建议30分钟上传一次。调试模式下，没有写入文件，不会调用上传接口。
 /// * 使用方式：
 /// 初始化时传参`uploadFile`和`minutesWait`，获取记录的文件`ErrorLog.log.logFile`。
+/// 
+/// ### 设备信息
+/// 使用 [device_info](https://pub.dartlang.org/packages/device_info)，应用启动时会获取和记录。
+/// * 使用方式：
+/// ```dart
+/// await ErrorLog.log.getDeviceInfo();   // 异步返回设备信息
+/// ```
+/// * 输出格式：
+/// 字符串，Future<String>
+/// #### [2019-04-24 10:05:11.413469][info] 设备信息 [device_info](https://pub.dartlang.org/packages/device_info)
+/// #### [androidInfo] androidId: 1a08f53b320ccfef, ...
 /// 
 class ErrorLog {
 
@@ -129,6 +141,7 @@ class ErrorLog {
 
     _logFile = await _getLocalFile();
     info('应用启动成功。');
+    getDeviceInfo();
 
     if( !_debugMode ) _uploadFile(_logFile);
     Timer.periodic(Duration(minutes: _minutesWait), (timer) async {
@@ -139,7 +152,78 @@ class ErrorLog {
       }
       
     });
+    
+  }
 
+
+  /// * 获取设备信息
+  /// * [device_info](https://pub.dartlang.org/packages/device_info)
+  Future<String> getDeviceInfo() async {
+
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    String details = '设备信息[device_info](https://pub.dartlang.org/packages/device_info)\n ';
+    
+    try {
+
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+
+      details += '[iosInfo] identifierForVendor: ${iosInfo.identifierForVendor}, ';
+      details += 'isPhysicalDevice: ${iosInfo.isPhysicalDevice}, ';
+      details += 'localizedModel: ${iosInfo.localizedModel}, ';
+      details += 'model: ${iosInfo.model}, ';
+      details += 'name: ${iosInfo.name}, ';
+      details += 'systemName: ${iosInfo.systemName}, ';
+      details += 'systemVersion: ${iosInfo.systemVersion}. ';
+
+      details += '\n [iosInfo.utsname] machine: ${iosInfo.utsname.machine}, ';
+      details += 'nodename: ${iosInfo.utsname.nodename}, ';
+      details += 'release: ${iosInfo.utsname.release}, ';
+      details += 'sysname: ${iosInfo.utsname.sysname}, ';
+      details += 'version: ${iosInfo.utsname.version}. ';
+
+    } catch(e) {
+      error('无法获取 ios 设备信息。');
+    }
+
+    try {
+
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+
+      details += '[androidInfo] androidId: ${androidInfo.androidId}, ';
+      details += 'board: ${androidInfo.board}, ';
+      details += 'bootloader: ${androidInfo.bootloader}, ';
+      details += 'brand: ${androidInfo.brand}, ';
+      details += 'device: ${androidInfo.device}, ';
+      details += 'display: ${androidInfo.display}, ';
+      details += 'fingerprint: ${androidInfo.fingerprint}, ';
+      details += 'hardware: ${androidInfo.hardware}, ';
+      details += 'host: ${androidInfo.host}, ';
+      details += 'id: ${androidInfo.id}, ';
+      details += 'isPhysicalDevice: ${androidInfo.isPhysicalDevice}, ';
+      details += 'manufacturer: ${androidInfo.manufacturer}, ';
+      details += 'model: ${androidInfo.model}, ';
+      details += 'product: ${androidInfo.product}, ';
+      details += 'supported32BitAbis: ${androidInfo.supported32BitAbis}, ';
+      details += 'supported64BitAbis: ${androidInfo.supported64BitAbis}, ';
+      details += 'supportedAbis: ${androidInfo.supportedAbis}, ';
+      details += 'tags: ${androidInfo.tags}, ';
+      details += 'type: ${androidInfo.type}. ';
+
+      details += '\n [androidInfo.version] baseOS: ${androidInfo.version.baseOS}, ';
+      details += 'codename: ${androidInfo.version.codename}, ';
+      details += 'incremental: ${androidInfo.version.incremental}, ';
+      details += 'previewSdkInt: ${androidInfo.version.previewSdkInt}, ';
+      details += 'release: ${androidInfo.version.release}, ';
+      details += 'sdkInt: ${androidInfo.version.sdkInt}, ';
+      details += 'securityPatch: ${androidInfo.version.securityPatch}. ';
+
+    } catch(e) {
+      error('无法获取 android 设备信息。');
+    }
+
+    info(details);
+    return details;
+    
   }
 
 
