@@ -58,7 +58,7 @@
  await ErrorLog.log.getDeviceInfo();   // 异步返回设备信息
  ```
  * 输出格式：
- 字符串，Future<String>
+ 字符串，Future String
  #### [2019-04-24 10:05:11.413469][info] 设备信息 [device_info](https://pub.dartlang.org/packages/device_info)
  #### [androidInfo] androidId: 1a08f53b320ccfef, ...
  
