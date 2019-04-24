@@ -50,4 +50,15 @@
  打开应用时上传一次，然后设置计时器，建议30分钟上传一次。
  * 使用方式：
  初始化时传参`uploadFile`和`minutesWait`，获取记录的文件`ErrorLog.log.logFile`。
+
+ ### 设备信息
+ 使用 [device_info](https://pub.dartlang.org/packages/device_info)，应用启动时会获取和记录。
+ * 使用方式：
+ ```dart
+ await ErrorLog.log.getDeviceInfo();   // 异步返回设备信息
+ ```
+ * 输出格式：
+ 字符串，Future<String>
+ #### [2019-04-24 10:05:11.413469][info] 设备信息 [device_info](https://pub.dartlang.org/packages/device_info)
+ #### [androidInfo] androidId: 1a08f53b320ccfef, ...
  
